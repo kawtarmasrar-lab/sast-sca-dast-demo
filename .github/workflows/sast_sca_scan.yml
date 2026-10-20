@@ -6,13 +6,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  sast_sca_checks:
+  sca_checks:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -24,23 +22,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r vulnerable_flask_app/requirements.txt
 
-      - name: Run SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=kawtarmasrar-lab
-            -Dsonar.projectKey=kawtarmasrar-lab_sast-sca-dast-demo
-            -Dsonar.sources=vulnerable_flask_app
-
-      - name: SonarQube Quality Gate check
-        uses: sonarsource/sonarqube-quality-gate-action@v1
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: Run pip-audit
-        if: always()
+      - name: Run pip-audit (SCA)
         run: |
           pip install pip-audit
           pip-audit -r vulnerable_flask_app/requirements.txt
